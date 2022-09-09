@@ -1,0 +1,69 @@
+---
+version: "2"
+services:
+  yb-master-n1:
+    image: yugabytedb/yugabyte:latest
+    container_name: yb-master-n1
+    hostname: yb-master-n1
+
+    volumes:
+      - yb-master-data-1:/mnt/master
+    command:
+      [
+        "/home/yugabyte/bin/yb-master",
+        "--fs_data_dirs=/mnt/master",
+        "--master_addresses=yb-master-n1:7100",
+        "--rpc_bind_addresses=yb-master-n1:7100",
+        "--replication_factor=1",
+      ]
+    ports:
+      - 7000:7000
+    environment:
+      SERVICE_7000_NAME: yb-master
+
+  yb-tserver-n1:
+    image: yugabytedb/yugabyte:latest
+    container_name: yb-tserver-n1
+    hostname: yb-tserver-n1
+    volumes:
+      - yb-tserver-data-1:/mnt/tserver
+    command:
+      [
+        "/home/yugabyte/bin/yb-tserver",
+        "--fs_data_dirs=/mnt/tserver",
+        "--enable_ysql",
+        "--rpc_bind_addresses=yb-tserver-n1:9100",
+        "--tserver_master_addrs=yb-master-n1:7100",
+      ]
+    ports:
+      - 9042:9042
+      - 5433:5433
+      - 9000:9000
+    environment:
+      SERVICE_5433_NAME: ysql
+      SERVICE_9042_NAME: ycql
+      SERVICE_9000_NAME: yb-tserver
+    depends_on:
+      - yb-master-n1
+
+  yb-cli:
+    image: yugabytedb/yugabyte:latest
+    container_name: yb-cli
+    hostname: yb-cli
+    depends_on:
+      - yb-tserver-n1
+    entrypoint: /bin/bash
+    tty: true
+
+  app:
+    image: ghcr.io/yogendra/yb-e2e-demo
+    environment:
+      APP_INITIAL_YSQL_HOST: yb-tserver-n1
+      APP_TOPOLOGY_KEYS: cloud1.datacenter1.rack1
+    ports:
+      - 8080:8080
+    depends_on:
+        -  yb-tserver-n1
+volumes:
+  yb-master-data-1:
+  yb-tserver-data-1:
