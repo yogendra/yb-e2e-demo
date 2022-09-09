@@ -1,0 +1,44 @@
+isMultiAz: true
+
+AZ: asia-south1-a
+
+masterAddresses: "yb-master-0.us-dss2022.yb-masters.us-central1.svc.clusterset.local:7100,yb-master-0.eu-dss2022.yb-masters.eu-west1.svc.clusterset.local:7100,yb-master-0.ap-dss2022.yb-masters.ap-south1.svc.clusterset.local:7100"
+
+storage:
+  master:
+    storageClass: "standard-rwo"
+  tserver:
+    storageClass: "standard-rwo"
+
+replicas:
+  master: 1
+  tserver: 1
+  totalMasters: 3
+
+gflags:
+  master:
+    placement_cloud: "gke"
+    placement_region: "asia-south1"
+    placement_zone: "asia-south1-a"
+    leader_failure_max_missed_heartbeat_periods: 10
+  tserver:
+    placement_cloud: "gke"
+    placement_region: "asia-south1"
+    placement_zone: "asia-south1-a"
+    leader_failure_max_missed_heartbeat_periods: 10
+
+preflight:
+  skipBind: true
+  skipAll: true
+
+#domainName: clusterset.local
+
+resource:
+  master:
+    requests:
+      cpu: 0.5
+      memory: 0.5Gi
+  tserver:
+    requests:
+      cpu: 0.5
+      memory: 0.5Gi
