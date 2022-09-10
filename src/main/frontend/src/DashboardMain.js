@@ -14,7 +14,7 @@ export default function DashboardMain() {
                 p: 2,
                 display: 'flex',
                 flexDirection: 'column',
-                height: 240,
+                height: 'auto',
               }}
             >
               <Greetings/>

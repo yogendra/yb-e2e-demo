@@ -9,19 +9,29 @@ spec:
   selector:
     matchLabels:
       app: yb-e2e-demo
-  strategy: {}
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+      maxSurge: 1
   template:
     metadata:
       labels:
         app: yb-e2e-demo
     spec:
       containers:
-        - image: gcr.io/yogendra/yb-e2e-demo:latest
+        - image: ghcr.io/yogendra/yb-e2e-demo:latest
           name: yb-e2e-demo
-          resources: {}
+          resources:
+            requests:
+              cpu: 500m
+              memory: 2Gi
+            limits:
+              cpu: 800m
+              memory: 4Gi
           envFrom:
             - configMapRef:
-                name: dbconfig
+                name: yb-e2e-demo-config
                 optional: true
           ports:
             - containerPort: 8080
@@ -35,18 +45,18 @@ spec:
           readinessProbe:
             httpGet:
               path: /actuator/health
-              port: 8081
+              port: 8080
             initialDelaySeconds: 20
             periodSeconds: 10
-
 ---
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: dbconfig
+  name: yb-e2e-demo-config
 data:
-  APP_INITIAL_YSQL_HOST: yb-tserver-n1
-  APP_TOPOLOGY_KEYS: gcp.us-west2.us-west2-a
+  APP_INITIAL_YSQL_HOST: yb-tserver-0.yb-tservers.ap-south1.svc.cluster.local
+  APP_TOPOLOGY_KEYS: gke.asia-south1.asia-south1-a
+  APP_REGION: AP
 ---
 apiVersion: v1
 kind: Service
@@ -67,10 +77,10 @@ metadata:
   name: yb-e2e-demo
   annotations:
     kubernetes.io/ingress.class: "gce"
-    kubernetes.io/ingress.global-static-ip-name: "west-dss2022-ingress"
+    kubernetes.io/ingress.global-static-ip-name: "asia-dss2022-ingress"
 spec:
   rules:
-    - host: yb-e2e-demo.west.dss2022.yuga.ga
+    - host: yb-e2e-demo.ap.dss2022.yuga.ga
       http:
         paths:
           - path: "/*"

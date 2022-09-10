@@ -26,13 +26,26 @@ export default function Greetings() {
         {greetings.message}
       </Typography>
       <Typography color="text.secondary" sx={{flex: 1}}>
-        at {new Date(greetings.timestamp).toLocaleTimeString()}
+        <b>At:</b> {new Date(greetings.timestamp).toLocaleTimeString()}
       </Typography>
-      <div>
+      {greetings.backend? (
+        greetings.backend.split(",").map( item => {
+          const parts = item.split(/=(.*)/s)
+          const key = parts[0].trim();
+          const value = parts[1].trim();
+          return (
+          <Typography color="text.secondary" sx={{flex: 1}}>
+             <b>{key}</b>: {value}
+          </Typography>
+          );
+
+        })
+      ): <></>}
+      <Typography color="text.secondary" sx={{flex: 1}}>
         <Link color="primary" href="#" onClick={refreshGreetings}>
           Refresh Greetings
         </Link>
-      </div>
+      </Typography>
     </React.Fragment>
   );
 }
