@@ -54,9 +54,9 @@ kind: ConfigMap
 metadata:
   name: yb-e2e-demo-config
 data:
-  APP_INITIAL_YSQL_HOST: yb-tserver-0.yb-tservers.eu-west1.svc.cluster.local
-  APP_TOPOLOGY_KEYS: gke.europe-west1.europe-west1-b
-  APP_REGION: EU
+  APP_INITIAL_YSQL_HOST: yb-tserver-0.yb-tservers.us-central1.svc.cluster.local
+  APP_TOPOLOGY_KEYS: gke.us-central1.us-central1-c
+  APP_REGION: US
 ---
 apiVersion: v1
 kind: Service
@@ -77,10 +77,10 @@ metadata:
   name: yb-e2e-demo
   annotations:
     kubernetes.io/ingress.class: "gce"
-    kubernetes.io/ingress.global-static-ip-name: "europe-dss2022-ingress"
+    kubernetes.io/ingress.global-static-ip-name: "us-dss2022-ingress"
 spec:
   rules:
-    - host: yb-e2e-demo.eu.dss2022.yuga.ga
+    - host: yb-e2e-demo.us.dss2022.yuga.ga
       http:
         paths:
           - path: "/*"
