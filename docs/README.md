@@ -6,7 +6,7 @@
 
 1. Create a spring project. Add:
     * Data JPA
-    * Rest Repositoru
+    * Rest Repository
     * Lombok
     * Actuator
     * Prometheus
@@ -125,52 +125,84 @@
 
 ## Create Infrastructure
 
-1.  Create GCP VPC
+1. Create GCP VPC
 
-2.  Create GKE Asia (South) and Configure Ingress
+2. Create GKE Asia (South) and Configure Ingress
 
-    ```bash
-    gcloud beta container clusters create ap-dss2022 \
-      --project "yrampuria-yb" \
-      --region "asia-south1" \
-      --no-enable-basic-auth \
-      --cluster-version "1.22.12-gke.1200" \
-      --release-channel "regular" \
-      --machine-type "n1-standard-8"  \
-      --image-type "COS_CONTAINERD" \
-      --disk-type "pd-standard" \
-      --disk-size "50" \
-      --enable-ip-alias \
-      --network "projects/yrampuria-yb/global/networks/default" \
-      --subnetwork "projects/yrampuria-yb/regions/asia-south1/subnetworks/default" \
-      --num-nodes "2" \
-      --node-locations "asia-south1-a" \
-      --labels "zone=asia-south1-a" \
-      --enable-shielded-nodes \
-      --workload-pool yrampuria-yb.svc.id.goog
+      ```bash
+      gcloud beta container clusters create ap-dss2022 \
+        --project "yrampuria-yb" \
+        --region "asia-south1" \
+        --no-enable-basic-auth \
+        --cluster-version "1.22.12-gke.1200" \
+        --release-channel "regular" \
+        --machine-type "n1-standard-8"  \
+        --image-type "COS_CONTAINERD" \
+        --disk-type "pd-standard" \
+        --disk-size "50" \
+        --enable-ip-alias \
+        --network "projects/yrampuria-yb/global/networks/default" \
+        --subnetwork "projects/yrampuria-yb/regions/asia-south1/subnetworks/default" \
+        --num-nodes "2" \
+        --node-locations "asia-south1-a" \
+        --labels "zone=asia-south1-a" \
+        --enable-shielded-nodes \
+        --workload-pool yrampuria-yb.svc.id.goog
 
-    ```
+      ```
 
-    ```bash
-    gcloud compute addresses create asia-dss2022-ingress --global
-    INGRESS=$(gcloud compute addresses describe asia-dss2022-ingress --global --format="value(address)")
-    gcloud dns record-sets update ap.dss2022.yuga.ga --rrdatas=$INGRESS --ttl=300 --type=A --zone=yrampuria-yuga-ga
-    ```
+      ```bash
+      gcloud compute addresses create \
+        asia-dss2022-ingress \
+        --global \
 
-    ```bash
-    gcloud container hub memberships register ap-dss2022 --gke-cluster asia-south1/ap-dss2022 --enable-workload-identity --project yrampuria-yb
-    ```
+      INGRESS=$(gcloud compute addresses describe asia-dss2022-ingress --global --format="value(address)")
 
-    Cleanup (if required)
+      gcloud dns record-sets update \
+        ap.dss2022.yuga.ga \
+        --rrdatas=$INGRESS \
+        --ttl=300 \
+        --type=A \
+        --zone=yrampuria-yuga-ga
+      ```
 
-    ```bash
-    gcloud compute addresses delete asia-dss2022-ingress --global --quiet
-    gcloud dns record-sets update ap.dss2022.yuga.ga --rrdatas=127.0.0.1 --ttl=300 --type=A --zone=yrampuria-yuga-ga
-    gcloud container hub memberships unregister ap-dss2022 --gke-cluster asia-south1/ap-dss2022 --project yrampuria-yb
-    gcloud beta container clusters delete ap-dss2022 --project "yrampuria-yb" --region "asia-south1"
-    ```
+      ```bash
+      gcloud container hub memberships register \
+        ap-dss2022 \
+        --gke-cluster \
+        asia-south1/ap-dss2022 \
+        --enable-workload-identity \
+        --project yrampuria-yb
+      ```
 
-3.  Create GKE Europe (West) and Configure Ingress
+      Cleanup (if required)
+
+      ```bash
+      gcloud compute addresses delete \
+        asia-dss2022-ingress \
+        --global \
+        --quiet
+
+      gcloud dns record-sets update \
+        ap.dss2022.yuga.ga \
+        --rrdatas=127.0.0.1 \
+        --ttl=300 \
+        --type=A \
+        --zone=yrampuria-yuga-ga
+
+      gcloud container hub memberships unregister \
+        ap-dss2022 \
+        --gke-cluster \
+        asia-south1/ap-dss2022 \
+        --project yrampuria-yb
+
+      gcloud beta container clusters delete \
+        ap-dss2022 \
+        --project "yrampuria-yb" \
+        --region "asia-south1"
+      ```
+
+3. Create GKE Europe (West) and Configure Ingress
 
     ```bash
     gcloud beta container clusters create eu-dss2022 \
@@ -194,26 +226,56 @@
     ```
 
     ```bash
-    gcloud compute addresses create europe-dss2022-ingress --global
+    gcloud compute addresses create \
+      europe-dss2022-ingress \
+      --global
+
     INGRESS=$(gcloud compute addresses describe europe-dss2022-ingress --global --format="value(address)")
-    gcloud dns record-sets update eu.dss2022.yuga.ga --rrdatas=$INGRESS --ttl=300 --type=A --zone=yrampuria-yuga-ga
+
+    gcloud dns record-sets update \
+      eu.dss2022.yuga.ga \
+      --rrdatas=$INGRESS \
+      --ttl=300 \
+      --type=A \
+      --zone=yrampuria-yuga-ga
 
     ```
 
     ```bash
-    gcloud container hub memberships register eu-dss2022 --gke-cluster europe-west1/eu-dss2022 --enable-workload-identity --project yrampuria-yb
+    gcloud container hub memberships register \
+      eu-dss2022 \
+      --gke-cluster europe-west1/eu-dss2022 \
+      --enable-workload-identity \
+      --project yrampuria-yb
     ```
 
     Cleanup (if required)
 
     ```bash
-    gcloud compute addresses delete europe-dss2022-ingress --global --quiet
-    gcloud dns record-sets update eu.dss2022.yuga.ga --rrdatas=127.0.0.1 --ttl=300 --type=A --zone=yrampuria-yuga-ga
-    gcloud container hub memberships unregister eu-dss2022 --gke-cluster europe-west1/eu-dss2022 --project yrampuria-yb
-    gcloud beta container clusters delete eu-dss2022 --project "yrampuria-yb" --region "europe-west1" --quiet
+    gcloud compute addresses delete \
+      europe-dss2022-ingress \
+      --global \
+      --quiet
+
+    gcloud dns record-sets update \
+      eu.dss2022.yuga.ga \
+      --rrdatas=127.0.0.1 \
+      --ttl=300 \
+      --type=A \
+      --zone=yrampuria-yuga-ga
+
+    gcloud container hub memberships unregister \
+      eu-dss2022 \
+      --gke-cluster europe-west1/eu-dss2022 \
+      --project yrampuria-yb
+
+    gcloud beta container clusters delete eu-dss2022 \
+      --project "yrampuria-yb" \
+      --region "europe-west1" \
+      --quiet
     ```
 
-4.  Create GKE US (Central) and Configure Ingress
+4. Create GKE US (Central) and Configure Ingress
 
     ```bash
     gcloud beta container clusters create us-dss2022 \
@@ -237,104 +299,186 @@
     ```
 
     ```bash
-    gcloud compute addresses create us-dss2022-ingress --global
+    gcloud compute addresses create
+      us-dss2022-ingress \
+      --global
+
     INGRESS=$(gcloud compute addresses describe us-dss2022-ingress --global --format="value(address)")
-    gcloud dns record-sets update us.dss2022.yuga.ga --rrdatas=$INGRESS --ttl=300 --type=A --zone=yrampuria-yuga-ga
+
+    gcloud dns record-sets update us.dss2022.yuga.ga \
+      --rrdatas=$INGRESS \
+      --ttl=300 \
+      --type=A \
+      --zone=yrampuria-yuga-ga
     ```
 
     ```bash
-    gcloud container hub memberships register us-dss2022 --gke-cluster us-central1/us-dss2022 --enable-workload-identity --project yrampuria-yb
+    gcloud container hub memberships register us-dss2022 \
+      --gke-cluster us-central1/us-dss2022 \
+      --enable-workload-identity \
+      --project yrampuria-yb
     ```
 
     Cleanup (if required)
 
     ```bash
-    gcloud compute addresses delete us-dss2022-ingress --global --quiet
-    gcloud dns record-sets update us.dss2022.yuga.ga --rrdatas=127.0.0.1 --ttl=300 --type=A --zone=yrampuria-yuga-ga
-    gcloud container hub memberships unregister us-dss2022 --gke-cluster us-central1/us-dss2022 --project yrampuria-yb
-    gcloud beta container clusters delete us-dss2022 --project "yrampuria-yb" --region "us-central1" --quiet
+    gcloud compute addresses delete us-dss2022-ingress \
+      --global \
+      --quiet
+
+    gcloud dns record-sets update us.dss2022.yuga.ga \
+      --rrdatas=127.0.0.1 \
+      --ttl=300 \
+      --type=A \
+      --zone=yrampuria-yuga-ga
+
+    gcloud container hub memberships unregister us-dss2022 \
+      --gke-cluster us-central1/us-dss2022 \
+      --project yrampuria-yb
+
+    gcloud beta container clusters delete us-dss2022 \
+      --project "yrampuria-yb" \
+      --region "us-central1" \
+      --quiet
     ```
 
-5.  Deploy Yugabyte on GKE Asia (South)
+5. Deploy Yugabyte on GKE Asia (South)
 
     Generate template and update broadcast addresses
 
     ```bash
-    helm template yugabytedb/yugabyte --namespace ap-south1 -f deployment/ap/k8s/ap-south1.yaml --dry-run > deployment/cloud/ap/k8s/ap-dss2022.yaml
+    helm template yugabytedb/yugabyte \
+      --namespace ap-south1 \
+      -f deployment/ap/k8s/ap-south1.yaml \
+      --dry-run \
+      > deployment/cloud/ap/k8s/ap-dss2022.yaml
     ```
 
     Deploy database
 
     ```bash
-    kubectl --context=gke_yrampuria-yb_asia-south1_ap-dss2022 create ns ap-south1
-    kubectl --context=gke_yrampuria-yb_asia-south1_ap-dss2022 -n ap-south1 apply -f deployment/cloud/ap/k8s/ap-dss2022.yaml
-    kubectl --context=gke_yrampuria-yb_asia-south1_ap-dss2022 -n ap-south1 apply -f deployment/cloud/ap/k8s/service-export.yaml
+    kubectl --context=gke_yrampuria-yb_asia-south1_ap-dss2022 \
+      create ns ap-south1
+
+    kubectl --context=gke_yrampuria-yb_asia-south1_ap-dss2022 \
+      -n ap-south1 apply -f deployment/cloud/ap/k8s/ap-dss2022.yaml
+
+    kubectl --context=gke_yrampuria-yb_asia-south1_ap-dss2022 \
+      -n ap-south1 apply -f deployment/cloud/ap/k8s/service-export.yaml
 
     # Check status and errors
-    kubectl --context=gke_yrampuria-yb_asia-south1_ap-dss2022 -n ap-south1 get all,pv,pvc
-    kubectl --context=gke_yrampuria-yb_asia-south1_ap-dss2022 -n ap-south1 get svc yb-master-ui -o jsonpath="{.status.loadBalancer.ingress[0].ip}"
-    kubectl --context=gke_yrampuria-yb_asia-south1_ap-dss2022 -n ap-south1 logs -l chart=yugabyte --all-containers --prefix -f
+    kubectl --context=gke_yrampuria-yb_asia-south1_ap-dss2022 \
+      -n ap-south1 get all,pv,pvc
+
+    kubectl --context=gke_yrampuria-yb_asia-south1_ap-dss2022 \
+      -n ap-south1
+      get svc yb-master-ui \
+      -o jsonpath="{.status.loadBalancer.ingress[0].ip}"
+
+    kubectl --context=gke_yrampuria-yb_asia-south1_ap-dss2022 \
+      -n ap-south1 logs \
+      -l chart=yugabyte \
+      --all-containers \
+      --prefix \
+      -f
     ```
 
-6.  Deploy Yugabyte on GKE Europe (West)
+6. Deploy Yugabyte on GKE Europe (West)
 
     Generate template and update broadcast addresses
 
     ```bash
-    helm template yugabytedb/yugabyte --namespace eu-west1 -f deployment/cloud/eu/k8s/eu-west1.yaml --dry-run > deployment/cloud/eu/k8s/eu-dss2022.yaml
+    helm template yugabytedb/yugabyte \
+      --namespace eu-west1 \
+      -f deployment/cloud/eu/k8s/eu-west1.yaml \
+      --dry-run \
+      > deployment/cloud/eu/k8s/eu-dss2022.yaml
     ```
 
     Deploy database
 
     ```bash
-    kubectl --context=gke_yrampuria-yb_europe-west1_eu-dss2022 create ns eu-west1
-    kubectl --context=gke_yrampuria-yb_europe-west1_eu-dss2022 -n eu-west1 apply -f deployment/cloud/eu/k8s/eu-dss2022.yaml
-    kubectl --context=gke_yrampuria-yb_europe-west1_eu-dss2022 -n eu-west1 apply -f deployment/cloud/eu/k8s/service-export.yaml
+    kubectl --context=gke_yrampuria-yb_europe-west1_eu-dss2022 \
+      create ns eu-west1
+
+    kubectl --context=gke_yrampuria-yb_europe-west1_eu-dss2022 \
+      -n eu-west1 apply -f deployment/cloud/eu/k8s/eu-dss2022.yaml
+
+    kubectl --context=gke_yrampuria-yb_europe-west1_eu-dss2022 \
+      -n eu-west1 apply -f deployment/cloud/eu/k8s/service-export.yaml
 
     # Check status and errors
-    kubectl --context=gke_yrampuria-yb_europe-west1_eu-dss2022 -n eu-west1 get all,pv,pvc
-    kubectl --context=gke_yrampuria-yb_europe-west1_eu-dss2022 -n eu-west1 get svc yb-master-ui -o jsonpath="{.status.loadBalancer.ingress[0].ip}"
-    kubectl --context=gke_yrampuria-yb_europe-west1_eu-dss2022 -n eu-west1 logs -l chart=yugabyte --all-containers --prefix -f
+    kubectl --context=gke_yrampuria-yb_europe-west1_eu-dss2022 \
+      -n eu-west1 get all,pv,pvc
+
+    kubectl --context=gke_yrampuria-yb_europe-west1_eu-dss2022 \
+      -n eu-west1 get svc yb-master-ui -o jsonpath="{.status.loadBalancer.ingress[0].ip}"
+
+    kubectl --context=gke_yrampuria-yb_europe-west1_eu-dss2022 \
+      -n eu-west1 logs -l chart=yugabyte --all-containers --prefix -f
     ```
 
-7.  Deploy Yugabyte on GKE US (Central)
+7. Deploy Yugabyte on GKE US (Central)
 
     Generate template and update broadcast addresses
 
     ```bash
-    helm template yugabytedb/yugabyte --namespace us-central1 -f deployment/cloud/us/k8s/us-central1.yaml --dry-run > deployment/cloud/us/k8s/us-dss2022.yaml
+    helm template yugabytedb/yugabyte \
+      --namespace us-central1 \
+      -f deployment/cloud/us/k8s/us-central1.yaml \
+      --dry-run \
+      > deployment/cloud/us/k8s/us-dss2022.yaml
     ```
 
     Deploy database
 
     ```bash
-    kubectl --context=gke_yrampuria-yb_us-central1_us-dss2022  create ns us-central1
-    kubectl --context=gke_yrampuria-yb_us-central1_us-dss2022 -n us-central1 apply -f deployment/cloud/us/k8s/us-dss2022.yaml
-    kubectl --context=gke_yrampuria-yb_us-central1_us-dss2022 -n us-central1 apply -f deployment/cloud/us/k8s/service-export.yaml
+    kubectl --context=gke_yrampuria-yb_us-central1_us-dss2022  \
+      create ns us-central1
+
+    kubectl --context=gke_yrampuria-yb_us-central1_us-dss2022 \
+      -n us-central1 apply -f deployment/cloud/us/k8s/us-dss2022.yaml
+
+    kubectl --context=gke_yrampuria-yb_us-central1_us-dss2022 \
+      -n us-central1 apply -f deployment/cloud/us/k8s/service-export.yaml
 
     # Check status and errors
-    kubectl --context=gke_yrampuria-yb_us-central1_us-dss2022 -n us-central1 get all,pv,pvc
-    kubectl --context=gke_yrampuria-yb_us-central1_us-dss2022 -n us-central1 get svc yb-master-ui -o jsonpath="{.status.loadBalancer.ingress[0].ip}"
-    kubectl --context=gke_yrampuria-yb_us-central1_us-dss2022 -n us-central1 logs -l chart=yugabyte --all-containers --prefix -f
+    kubectl --context=gke_yrampuria-yb_us-central1_us-dss2022 \
+      -n us-central1 get all,pv,pvc
+
+    kubectl --context=gke_yrampuria-yb_us-central1_us-dss2022 \
+      -n us-central1 get svc yb-master-ui \
+      -o jsonpath="{.status.loadBalancer.ingress[0].ip}"
+
+    kubectl --context=gke_yrampuria-yb_us-central1_us-dss2022 \
+      -n us-central1 logs -l chart=yugabyte --all-containers --prefix -f
     ```
 
-8.  Uninstall / Cleanup (If required)
+8. Uninstall / Cleanup (If required)
 
     ```bash
-    kubectl --context=gke_yrampuria-yb_asia-south1_ap-dss2022 delete -n ap-south1 -f  deployment/cloud/ap/k8s/ap-dss2022.yaml
-    kubectl --context=gke_yrampuria-yb_asia-south1_ap-dss2022 delete -n ap-south1 pvc -l chart=yugabyte
+    kubectl --context=gke_yrampuria-yb_asia-south1_ap-dss2022 delete \
+      -n ap-south1 -f  deployment/cloud/ap/k8s/ap-dss2022.yaml
 
-    kubectl --context=gke_yrampuria-yb_europe-west1_eu-dss2022 delete -n eu-west1 -f  deployment/cloud/eu/k8s/eu-dss2022.yaml
-    kubectl --context=gke_yrampuria-yb_europe-west1_eu-dss2022 delete -n eu-west1 pvc -l chart=yugabyte
+    kubectl --context=gke_yrampuria-yb_asia-south1_ap-dss2022 delete \
+      -n ap-south1 pvc -l chart=yugabyte
 
-    kubectl --context=gke_yrampuria-yb_us-central1_us-dss2022 delete -n us-central1 -f  deployment/cloud/us/k8s/us-dss2022.yaml
-    kubectl --context=gke_yrampuria-yb_us-central1_us-dss2022 delete -n us-central1 pvc -l chart=yugabyte
+    kubectl --context=gke_yrampuria-yb_europe-west1_eu-dss2022 delete \
+      -n eu-west1 -f  deployment/cloud/eu/k8s/eu-dss2022.yaml
+
+    kubectl --context=gke_yrampuria-yb_europe-west1_eu-dss2022 delete \
+      -n eu-west1 pvc -l chart=yugabyte
+
+    kubectl --context=gke_yrampuria-yb_us-central1_us-dss2022 delete \
+      -n us-central1 -f  deployment/cloud/us/k8s/us-dss2022.yaml
+
+    kubectl --context=gke_yrampuria-yb_us-central1_us-dss2022 delete \
+      -n us-central1 pvc -l chart=yugabyte
     ```
-
 
 ## Deploy Database
 
-1.  Create tables
+1. Create tables
 
     ```bash
     TSERVER=$(kubectl --context=gke_yrampuria-yb_asia-south1_ap-dss2022  -n ap-south1 get svc yb-tserver-service -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
@@ -344,47 +488,53 @@
 
 ## Deploy Application
 
-
-1.  Initial
-
-    ```bash
-    # Asia
-    kubectl --context=gke_yrampuria-yb_asia-south1_ap-dss2022  -n ap-south1 apply -f deployment/cloud/ap/k8s/app.yaml
-
-    # Europe
-    kubectl --context=gke_yrampuria-yb_europe-west1_eu-dss2022  -n eu-west1 apply -f deployment/cloud/eu/k8s/app.yaml
-
-    # US
-    kubectl --context=gke_yrampuria-yb_us-central1_us-dss2022  -n us-central1 apply -f deployment/cloud/us/k8s/app.yaml
-    ```
-
-2.  Deploy Changes
+1. Initial
 
     ```bash
     # Asia
-    kubectl --context=gke_yrampuria-yb_asia-south1_ap-dss2022  -n ap-south1 rollout restart deployment yb-e2e-demo
+    kubectl --context=gke_yrampuria-yb_asia-south1_ap-dss2022  \
+      -n ap-south1 apply -f deployment/cloud/ap/k8s/app.yaml
 
     # Europe
-    kubectl --context=gke_yrampuria-yb_europe-west1_eu-dss2022  -n eu-west1 rollout restart deployment yb-e2e-demo
+    kubectl --context=gke_yrampuria-yb_europe-west1_eu-dss2022  \
+      -n eu-west1 apply -f deployment/cloud/eu/k8s/app.yaml
 
     # US
-    kubectl --context=gke_yrampuria-yb_us-central1_us-dss2022  -n us-central1 rollout restart deployment yb-e2e-demo
+    kubectl --context=gke_yrampuria-yb_us-central1_us-dss2022  \
+      -n us-central1 apply -f deployment/cloud/us/k8s/app.yaml
     ```
 
-3.  Cleanup
+2. Deploy Changes
 
     ```bash
     # Asia
-    kubectl --context=gke_yrampuria-yb_asia-south1_ap-dss2022  -n ap-south1 delete -f deployment/cloud/ap/k8s/app.yaml
+    kubectl --context=gke_yrampuria-yb_asia-south1_ap-dss2022  \
+      -n ap-south1 rollout restart deployment yb-e2e-demo
 
     # Europe
-    kubectl --context=gke_yrampuria-yb_europe-west1_eu-dss2022  -n eu-west1 delete -f deployment/cloud/eu/k8s/app.yaml
+    kubectl --context=gke_yrampuria-yb_europe-west1_eu-dss2022 \
+      -n eu-west1 rollout restart deployment yb-e2e-demo
 
     # US
-    kubectl --context=gke_yrampuria-yb_us-central1_us-dss2022  -n us-central1 delete -f deployment/cloud/us/k8s/app.yaml
+    kubectl --context=gke_yrampuria-yb_us-central1_us-dss2022  \
+      -n us-central1 rollout restart deployment yb-e2e-demo
     ```
 
+3. Cleanup
 
+    ```bash
+    # Asia
+    kubectl --context=gke_yrampuria-yb_asia-south1_ap-dss2022  \
+      -n ap-south1 delete -f deployment/cloud/ap/k8s/app.yaml
+
+    # Europe
+    kubectl --context=gke_yrampuria-yb_europe-west1_eu-dss2022  \
+      -n eu-west1 delete -f deployment/cloud/eu/k8s/app.yaml
+
+    # US
+    kubectl --context=gke_yrampuria-yb_us-central1_us-dss2022  \
+      -n us-central1 delete -f deployment/cloud/us/k8s/app.yaml
+    ```
 
 ## Troubleshooting App
 
@@ -392,10 +542,12 @@
 
     ```bash
     #Objects
-    kubectl --context=gke_yrampuria-yb_asia-south1_ap-dss2022  -n ap-south1 get all,cm,ing
+    kubectl --context=gke_yrampuria-yb_asia-south1_ap-dss2022  \
+      -n ap-south1 get all,cm,ing
 
     #Logs
-    kubectl --context=gke_yrampuria-yb_europe-west1_eu-dss2022  -n eu-west1 logs -l app=yb-e2e-demo --all-containers --prefix -f
+    kubectl --context=gke_yrampuria-yb_europe-west1_eu-dss2022 \
+      -n eu-west1 logs -l app=yb-e2e-demo --all-containers --prefix -f
 
     # API
     curl http://yb-e2e-demo.ap.dss2022.yuga.ga/api/v1/greetings
@@ -403,14 +555,16 @@
 
     ```
 
-2.  Europe
+2. Europe
 
     ```bash
     # Objects
-    kubectl --context=gke_yrampuria-yb_europe-west1_eu-dss2022  -n eu-west1 get all,cm,ing
+    kubectl --context=gke_yrampuria-yb_europe-west1_eu-dss2022 \
+      -n eu-west1 get all,cm,ing
 
     # Logs
-    kubectl --context=gke_yrampuria-yb_europe-west1_eu-dss2022  -n eu-west1 logs -l app=yb-e2e-demo --all-containers --prefix -f
+    kubectl --context=gke_yrampuria-yb_europe-west1_eu-dss2022 \
+      -n eu-west1 logs -l app=yb-e2e-demo --all-containers --prefix -f
 
     # API
     curl http://yb-e2e-demo.eu.dss2022.yuga.ga/api/v1/greetings
@@ -418,20 +572,21 @@
 
     ```
 
-3.  US
+3. US
 
     ```bash
     # Object
-    kubectl --context=gke_yrampuria-yb_us-central1_us-dss2022  -n us-central1 get all,cm,ing
+    kubectl --context=gke_yrampuria-yb_us-central1_us-dss2022 \
+      -n us-central1 get all,cm,ing
 
     # Logs
-    kubectl --context=gke_yrampuria-yb_us-central1_us-dss2022  -n us-central1 logs -l app=yb-e2e-demo --all-containers --prefix -f
+    kubectl --context=gke_yrampuria-yb_us-central1_us-dss2022 \
+      -n us-central1 logs -l app=yb-e2e-demo --all-containers --prefix -f
 
     # API
     curl http://yb-e2e-demo.us.dss2022.yuga.ga/api/v1/greetings
     curl http://yb-e2e-demo.us.dss2022.yuga.ga/api/v1/orders/1
     ```
-
 
 [img/00]: 00-app.png
 [img/01]: 01-create-spring-project.png
